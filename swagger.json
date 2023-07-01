@@ -1,0 +1,190 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API Documentation",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3001/api/v1"
+    }
+  ],
+  "paths": {
+    "/customers/register": {
+      "post": {
+        "tags": ["Customer"],
+        "summary": "Register a new customer",
+        "operationId": "registerCustomer",
+        "requestBody": {
+          "description": "Customer registration data",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Customer/Login"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Customer registration successful"
+          }
+        }
+      }
+    },
+    "/customers/login": {
+      "post": {
+        "tags": ["Customer"],
+        "summary": "Customer login",
+        "operationId": "customerLogin",
+        "requestBody": {
+          "description": "Customer registration data",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Customer/Login"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful login",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/customers/refreshToken": {
+      "post": {
+        "tags": ["Customer"],
+        "summary": "Refresh customer token",
+        "operationId": "refreshCustomerToken",
+
+        "requestBody": {
+          "description": "Customer registration data",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Customer/RefreshToken"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token refresh successful"
+          }
+        }
+      }
+    },
+    "/carts/{idCustomer}": {
+      "get": {
+        "tags": ["Cart"],
+        "summary": "Get cart items",
+        "operationId": "getCartItems",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "idCustomer",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of cart items"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Cart"],
+        "summary": "Add item to cart",
+        "operationId": "addToCart",
+        "parameters": [
+          {
+            "name": "idCustomer",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful addition to cart"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Cart"],
+        "summary": "Reset cart",
+        "operationId": "resetCart",
+        "parameters": [
+          {
+            "name": "idCustomer",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cart reset successful"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Customer": {
+        "Login": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string",
+              "default": "user@gmail.com"
+            },
+            "password": {
+              "type": "string",
+              "default": "123456"
+            }
+          },
+          "required": ["email", "password"]
+        },
+        "RefreshToken": {
+          "type": "object",
+          "properties": {
+            "refreshToken": {
+              "type": "string"
+            }
+          },
+          "required": ["refreshToken"]
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
