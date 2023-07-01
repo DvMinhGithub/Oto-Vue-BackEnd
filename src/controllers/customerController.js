@@ -82,46 +82,53 @@ const customerController = {
   login: async (req, res) => {
     try {
       const { email, password } = req.body;
+
+      // Find the user by email
       const user = await customerModel.findOne({ email });
       if (!user) {
         return res
           .status(401)
           .json({ success: false, message: 'Email không tồn tại' });
       }
-      const checkPassword = await bcrypt.compare(password, user.password);
-      if (!checkPassword) {
+
+      // Compare the provided password with the hashed password stored in the database
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
         return res
           .status(401)
           .json({ success: false, message: 'Mật khẩu không đúng' });
       }
+
+      // Prepare user data for tokens
       const userData = {
         _id: user._id,
         userName: user.userName,
         email: user.email,
         role: user.role,
       };
+
+      // Generate access and refresh tokens
       const accessToken = generateAccessToken(userData);
       const refreshToken = generateRefreshToken(userData);
+
+      // Update user's refresh token in the database
       user.refreshToken = refreshToken;
       await user.save();
+
       return res.status(200).json({
         success: true,
-        userData,
+        userId: user._id,
         accessToken,
         refreshToken,
       });
     } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+      return res.status(500).json({ success: false, message: error.message });
     }
   },
 
   refreshToken: async (req, res) => {
     try {
       const { refreshToken } = req.body;
-      console.log(
-        'file: customerController.js:121 ~ refreshToken:',
-        refreshToken
-      );
       if (!refreshToken) {
         return res
           .status(404)
@@ -156,11 +163,8 @@ const customerController = {
         });
 
         res.status(200).json({
-          success: true,
-          data: {
-            accessToken: newAccessToken,
-            refreshToken: newRefreshToken,
-          },
+          accessToken: newAccessToken,
+          refreshToken: newRefreshToken,
         });
       });
     } catch (error) {
@@ -173,16 +177,27 @@ const customerController = {
 
   logOut: async (req, res, next) => {
     try {
-      const refreshToken = req.cookies.refreshToken;
-
-      // clear cookie khi logout
-      arrRefreshToken = arrRefreshToken.filter(
-        (token) => token !== refreshToken
-      );
-      res.clearCookie('refreshToken');
+      const { refreshToken } = req.body;
+      await customerModel.findOneAndUpdate(refreshToken, { refreshToken: '' });
       res.status(200).json({ success: true });
     } catch (err) {
       next(err);
+    }
+  },
+  getInfo: async (req, res, next) => {
+    try {
+      const { id: userId } = req.params;
+      const userInfo = await customerModel
+        .findById(userId)
+        .select('-password -refreshToken -listOrder -reviewCustomer');
+      res.status(200).json({
+        userInfo,
+      });
+    } catch (error) {
+      console.error(error);
+      res
+        .status(500)
+        .json({ success: false, message: 'Internal server error' });
     }
   },
 };
