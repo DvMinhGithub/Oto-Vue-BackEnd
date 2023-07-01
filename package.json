@@ -27,6 +27,8 @@
     "swagger-ui-express": "^4.6.3"
   },
   "imports": {
+    "#controllers/*": "./src/controllers/*.js",
+    "#models/*": "./src/models/*.js",
     "#src/*": "./src/*.js"
   }
 }

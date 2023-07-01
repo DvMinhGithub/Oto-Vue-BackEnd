@@ -2,6 +2,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "#controllers/*": ["./src/controllers/*.js"],
+      "#models/*": ["./src/models/*.js"],
       "#src/*": ["./src/*.js"]
     }
   }

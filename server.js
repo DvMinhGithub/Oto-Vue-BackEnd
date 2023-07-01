@@ -26,7 +26,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
   morgan('dev', {
     skip: function (req, res) {
-      return res.statusCode < 400;
+      return res.statusCode < 200;
     },
   })
 );
