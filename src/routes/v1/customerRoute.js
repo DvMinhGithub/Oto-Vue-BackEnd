@@ -22,4 +22,6 @@ router.post('/refreshToken', customerController.refreshToken);
 
 router.post('/logout', customerController.logOut);
 
+router.post('/changePassword/:id',customerController.changePassword)
+
 module.exports = router;

@@ -1,10 +1,10 @@
-const customerModel = require('../models/customer');
-const bcrypt = require('bcrypt');
-const cartModel = require('../models/cart');
-const fs = require('fs');
-const path = require('path');
-const jwt = require('jsonwebtoken');
-const { generateAccessToken, generateRefreshToken } = require('../utils/auth');
+const customerModel = require("../models/customer");
+const bcrypt = require("bcrypt");
+const cartModel = require("../models/cart");
+const fs = require("fs");
+const path = require("path");
+const jwt = require("jsonwebtoken");
+const { generateAccessToken, generateRefreshToken } = require("../utils/auth");
 
 const customerController = {
   register: async (req, res) => {
@@ -15,7 +15,7 @@ const customerController = {
       if (checkEmail) {
         return res
           .status(404)
-          .json({ success: false, message: 'Email đã tồn tại' });
+          .json({ success: false, message: "Email đã tồn tại" });
       } else {
         const hashPassword = await bcrypt.hash(password, 10);
         const customerAcc = await customerModel.create({
@@ -31,7 +31,7 @@ const customerController = {
 
         return res.status(200).json({
           success: true,
-          message: 'Đăng ký thành công',
+          message: "Đăng ký thành công",
           data: customerAcc,
         });
       }
@@ -57,8 +57,8 @@ const customerController = {
         if (currentAvatarUrl && currentAvatarUrl !== newAvatarUrl) {
           const oldAvatarPath = path.join(
             __dirname,
-            '../../public',
-            currentAvatarUrl.replace(`http://localhost:${process.env.PORT}`, '')
+            "../../public",
+            currentAvatarUrl.replace(`http://localhost:${process.env.PORT}`, "")
           );
           if (fs.existsSync(oldAvatarPath)) fs.unlinkSync(oldAvatarPath);
         }
@@ -72,7 +72,7 @@ const customerController = {
 
       res.status(200).json({
         success: true,
-        message: 'Cập nhật thành công',
+        message: "Cập nhật thành công",
         data: updatedCustomer,
       });
     } catch (error) {
@@ -88,7 +88,7 @@ const customerController = {
       if (!user) {
         return res
           .status(401)
-          .json({ success: false, message: 'Email không tồn tại' });
+          .json({ success: false, message: "Email không tồn tại" });
       }
 
       // Compare the provided password with the hashed password stored in the database
@@ -96,7 +96,7 @@ const customerController = {
       if (!isPasswordValid) {
         return res
           .status(401)
-          .json({ success: false, message: 'Mật khẩu không đúng' });
+          .json({ success: false, message: "Mật khẩu không đúng" });
       }
 
       // Prepare user data for tokens
@@ -132,21 +132,21 @@ const customerController = {
       if (!refreshToken) {
         return res
           .status(404)
-          .json({ success: false, message: 'Không tìm thấy refreshToken' });
+          .json({ success: false, message: "Không tìm thấy refreshToken" });
       }
 
       const user = await customerModel.findOne({ refreshToken });
       if (!user) {
         return res
           .status(404)
-          .json({ success: false, message: 'RefreshToken không hợp lệ' });
+          .json({ success: false, message: "RefreshToken không hợp lệ" });
       }
 
       jwt.verify(refreshToken, process.env.REFRESH_TOKEN, async (err, data) => {
         if (err) {
           return res
             .status(401)
-            .json({ success: false, message: 'Không được phép' });
+            .json({ success: false, message: "Không được phép" });
         }
 
         const userData = {
@@ -171,14 +171,14 @@ const customerController = {
       console.error(error);
       res
         .status(500)
-        .json({ success: false, message: 'Internal server error' });
+        .json({ success: false, message: "Internal server error" });
     }
   },
 
   logOut: async (req, res, next) => {
     try {
       const { refreshToken } = req.body;
-      await customerModel.findOneAndUpdate(refreshToken, { refreshToken: '' });
+      await customerModel.findOneAndUpdate(refreshToken, { refreshToken: "" });
       res.status(200).json({ success: true });
     } catch (err) {
       next(err);
@@ -189,7 +189,7 @@ const customerController = {
       const { id: userId } = req.params;
       const userInfo = await customerModel
         .findById(userId)
-        .select('-password -refreshToken -listOrder -reviewCustomer');
+        .select("-password -refreshToken -listOrder -reviewCustomer");
       res.status(200).json({
         userInfo,
       });
@@ -197,7 +197,28 @@ const customerController = {
       console.error(error);
       res
         .status(500)
-        .json({ success: false, message: 'Internal server error' });
+        .json({ success: false, message: "Internal server error" });
+    }
+  },
+  changePassword: async (req, res, next) => {
+    try {
+      const id = req.params.id;
+      const { oldPassword, newPassword } = req.body;
+      const user = await customerModel.findById(id);
+      const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+      if (isPasswordValid) {
+        const hashPassword = await bcrypt.hash(newPassword, 10);
+        await customerModel.findByIdAndUpdate(id, { password: hashPassword });
+        res.status(200).json({
+          message: "Change passsword success",
+        });
+      } else {
+        res.status(400).json({
+          message: "Old password is not correct",
+        });
+      }
+    } catch (error) {
+      res.status(500);
     }
   },
 };
