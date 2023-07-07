@@ -128,6 +128,7 @@ const customerController = {
 
   refreshToken: async (req, res) => {
     try {
+      console.log('a', req.cookies)
       const { refreshToken } = req.body;
       if (!refreshToken) {
         return res
