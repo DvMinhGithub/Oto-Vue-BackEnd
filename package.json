@@ -4,31 +4,40 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon ./server.js"
+    "start": "nodemon src/index.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prettier": "prettier --check .",
+    "prettier:fix": "prettier --write ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bcrypt": "^5.1.0",
+    "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
-    "dotenv": "^16.0.3",
+    "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "helmet": "^6.1.5",
-    "jsonwebtoken": "^9.0.0",
+    "helmet": "^7.0.0",
+    "jsonwebtoken": "^9.0.2",
     "moment-timezone": "^0.5.43",
-    "mongoose": "^7.0.3",
-    "morgan": "^1.10.0",
-    "multer": "1.4.5-lts.1",
-    "nodemon": "^2.0.22",
-    "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^4.6.3"
+    "mongoose": "^7.5.0",
+    "multer": "^1.4.5-lts.1"
   },
   "imports": {
     "#controllers/*": "./src/controllers/*.js",
     "#models/*": "./src/models/*.js",
     "#src/*": "./src/*.js"
+  },
+  "devDependencies": {
+    "eslint": "^8.48.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "morgan": "^1.10.0",
+    "nodemon": "^3.0.1",
+    "prettier": "^3.0.3"
   }
 }

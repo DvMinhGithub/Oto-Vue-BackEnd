@@ -1,38 +1,38 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
 const carModel = new mongoose.Schema({
   name: {
-    type: String,
+    type: String
   },
   price: {
-    type: Number,
+    type: Number
   },
   discount: {
-    type: Number,
+    type: Number
   },
 
   //Giá sau khi giảm
   amountPrice: {
-    type: Number,
+    type: Number
   },
   model: {
-    type: String,
+    type: String
   },
   company: {
-    type: String,
+    type: String
   },
   carImage: {
-    type: String,
+    type: String
   },
   color: {
-    type: String,
+    type: String
   },
   description: {
-    type: String,
+    type: String
   },
 
   //Số lượng còn lại
   quantity: {
-    type: Number,
+    type: Number
   },
 
   //Đánh giá từ khách hàng
@@ -40,16 +40,16 @@ const carModel = new mongoose.Schema({
     {
       idCustomer: {
         type: mongoose.Types.ObjectId,
-        ref: "customer",
+        ref: 'customer'
       },
       nameCustomer: {
-        type: String,
+        type: String
       },
       review: {
-        type: String,
-      },
-    },
-  ],
-});
+        type: String
+      }
+    }
+  ]
+})
 
-module.exports = mongoose.model("car", carModel);
+module.exports = mongoose.model('car', carModel)

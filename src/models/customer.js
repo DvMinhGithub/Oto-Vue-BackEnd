@@ -1,50 +1,50 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
 const customerModel = new mongoose.Schema({
   userName: {
-    type: String,
+    type: String
   },
   phoneNumber: {
-    type: String,
+    type: String
   },
   email: {
-    type: String,
+    type: String
   },
   address: {
-    type: String,
+    type: String
   },
   password: {
-    type: String,
+    type: String
   },
   idCart: {
     type: mongoose.Types.ObjectId,
-    ref: "cart",
+    ref: 'cart'
   },
   avatar: {
-    type: String,
+    type: String
   },
   //lịch sử mua hàng
   listOrder: [
     {
       type: mongoose.Types.ObjectId,
-      ref: "bill",
-    },
+      ref: 'bill'
+    }
   ],
   role: {
     type: String,
-    default: "customer",
+    default: 'customer'
   },
   reviewCustomer: [
     {
       idProduct: {
         type: mongoose.Types.ObjectId,
-        ref: "car",
+        ref: 'car'
       },
       review: {
-        type: String,
-      },
-    },
+        type: String
+      }
+    }
   ],
-  refreshToken: { type: String },
-});
+  refreshToken: { type: String }
+})
 
-module.exports = mongoose.model("customer", customerModel);
+module.exports = mongoose.model('customer', customerModel)

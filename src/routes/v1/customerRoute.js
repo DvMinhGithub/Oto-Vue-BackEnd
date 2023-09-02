@@ -1,27 +1,22 @@
-const express = require('express');
-const router = express.Router();
+const express = require('express')
+const router = express.Router()
 
-const customerController = require('#src/controllers/customerController');
-const uploadFile = require('#src/middleware/upload');
-const { verifyTokenCustomer } = require('#src/middleware/verify');
+const customerController = require('#src/controllers/customerController')
+const uploadFile = require('#src/middleware/upload')
+const { verifyTokenCustomer } = require('#src/middleware/verify')
 
-router.get('/getInfo/:id', customerController.getInfo);
+router.get('/getInfo/:id', customerController.getInfo)
 
-router.post('/register', customerController.register);
+router.post('/register', customerController.register)
 
-router.put(
-  '/:id',
-  verifyTokenCustomer,
-  uploadFile('image'),
-  customerController.updateCustomer
-);
+router.put('/:id', verifyTokenCustomer, uploadFile('image'), customerController.updateCustomer)
 
-router.post('/login', customerController.login);
+router.post('/login', customerController.login)
 
-router.post('/refreshToken', customerController.refreshToken);
+router.post('/refreshToken', customerController.refreshToken)
 
-router.post('/logout', customerController.logOut);
+router.post('/logout', customerController.logOut)
 
-router.post('/changePassword/:id',customerController.changePassword)
+router.post('/changePassword/:id', customerController.changePassword)
 
-module.exports = router;
+module.exports = router

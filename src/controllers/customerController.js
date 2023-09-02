@@ -1,102 +1,90 @@
-const customerModel = require("../models/customer");
-const bcrypt = require("bcrypt");
-const cartModel = require("../models/cart");
-const fs = require("fs");
-const path = require("path");
-const jwt = require("jsonwebtoken");
-const { generateAccessToken, generateRefreshToken } = require("../utils/auth");
+const customerModel = require('../models/customer')
+const bcrypt = require('bcrypt')
+const cartModel = require('../models/cart')
+const fs = require('fs')
+const path = require('path')
+const jwt = require('jsonwebtoken')
+const { generateAccessToken, generateRefreshToken } = require('../utils/auth')
 
 const customerController = {
   register: async (req, res) => {
     try {
-      const { userName, phoneNumber, email, address, password } = req.body;
+      const { userName, phoneNumber, email, address, password } = req.body
 
-      const checkEmail = await customerModel.findOne({ email });
+      const checkEmail = await customerModel.findOne({ email })
       if (checkEmail) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Email đã tồn tại" });
+        return res.status(404).json({ success: false, message: 'Email đã tồn tại' })
       } else {
-        const hashPassword = await bcrypt.hash(password, 10);
+        const hashPassword = await bcrypt.hash(password, 10)
         const customerAcc = await customerModel.create({
           userName,
           email,
           phoneNumber,
           address,
-          password: hashPassword,
-        });
+          password: hashPassword
+        })
 
         //Khi tạo 1 customer mới sẽ tạo luôn 1 giỏ hàng cho customer đấy
-        await cartModel.create({ idCustomer: customerAcc._id });
+        await cartModel.create({ idCustomer: customerAcc._id })
 
         return res.status(200).json({
           success: true,
-          message: "Đăng ký thành công",
-          data: customerAcc,
-        });
+          message: 'Đăng ký thành công',
+          data: customerAcc
+        })
       }
     } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+      res.status(500).json({ success: false, message: error.message })
     }
   },
   updateCustomer: async (req, res) => {
     try {
-      const { id } = req.params;
+      const { id } = req.params
 
-      const currentCustomer = await customerModel.findById(id);
-      const currentAvatarUrl = currentCustomer.avatar;
+      const currentCustomer = await customerModel.findById(id)
+      const currentAvatarUrl = currentCustomer.avatar
 
-      const newAvatarUrl =
-        req.file &&
-        `http://localhost:${process.env.PORT}/images/${req.file.filename}`;
+      const newAvatarUrl = req.file && `http://localhost:${process.env.PORT}/images/${req.file.filename}`
 
-      const updateData = { ...req.body };
+      const updateData = { ...req.body }
       if (newAvatarUrl) {
-        updateData.avatar = newAvatarUrl;
+        updateData.avatar = newAvatarUrl
 
         if (currentAvatarUrl && currentAvatarUrl !== newAvatarUrl) {
           const oldAvatarPath = path.join(
             __dirname,
-            "../../public",
-            currentAvatarUrl.replace(`http://localhost:${process.env.PORT}`, "")
-          );
-          if (fs.existsSync(oldAvatarPath)) fs.unlinkSync(oldAvatarPath);
+            '../../public',
+            currentAvatarUrl.replace(`http://localhost:${process.env.PORT}`, '')
+          )
+          if (fs.existsSync(oldAvatarPath)) fs.unlinkSync(oldAvatarPath)
         }
       }
 
-      const updatedCustomer = await customerModel.findByIdAndUpdate(
-        id,
-        { $set: updateData },
-        { new: true }
-      );
+      const updatedCustomer = await customerModel.findByIdAndUpdate(id, { $set: updateData }, { new: true })
 
       res.status(200).json({
         success: true,
-        message: "Cập nhật thành công",
-        data: updatedCustomer,
-      });
+        message: 'Cập nhật thành công',
+        data: updatedCustomer
+      })
     } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+      res.status(500).json({ success: false, message: error.message })
     }
   },
   login: async (req, res) => {
     try {
-      const { email, password } = req.body;
+      const { email, password } = req.body
 
       // Find the user by email
-      const user = await customerModel.findOne({ email });
+      const user = await customerModel.findOne({ email })
       if (!user) {
-        return res
-          .status(401)
-          .json({ success: false, message: "Email không tồn tại" });
+        return res.status(401).json({ success: false, message: 'Email không tồn tại' })
       }
 
       // Compare the provided password with the hashed password stored in the database
-      const isPasswordValid = await bcrypt.compare(password, user.password);
+      const isPasswordValid = await bcrypt.compare(password, user.password)
       if (!isPasswordValid) {
-        return res
-          .status(401)
-          .json({ success: false, message: "Mật khẩu không đúng" });
+        return res.status(401).json({ success: false, message: 'Mật khẩu không đúng' })
       }
 
       // Prepare user data for tokens
@@ -104,124 +92,112 @@ const customerController = {
         _id: user._id,
         userName: user.userName,
         email: user.email,
-        role: user.role,
-      };
+        role: user.role
+      }
 
       // Generate access and refresh tokens
-      const accessToken = generateAccessToken(userData);
-      const refreshToken = generateRefreshToken(userData);
+      const accessToken = generateAccessToken(userData)
+      const refreshToken = generateRefreshToken(userData)
 
       // Update user's refresh token in the database
-      user.refreshToken = refreshToken;
-      await user.save();
+      user.refreshToken = refreshToken
+      await user.save()
 
       return res.status(200).json({
         success: true,
         userId: user._id,
         accessToken,
-        refreshToken,
-      });
+        refreshToken
+      })
     } catch (error) {
-      return res.status(500).json({ success: false, message: error.message });
+      return res.status(500).json({ success: false, message: error.message })
     }
   },
 
   refreshToken: async (req, res) => {
     try {
       console.log('a', req.cookies)
-      const { refreshToken } = req.body;
+      const { refreshToken } = req.body
       if (!refreshToken) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Không tìm thấy refreshToken" });
+        return res.status(404).json({ success: false, message: 'Không tìm thấy refreshToken' })
       }
 
-      const user = await customerModel.findOne({ refreshToken });
+      const user = await customerModel.findOne({ refreshToken })
       if (!user) {
-        return res
-          .status(404)
-          .json({ success: false, message: "RefreshToken không hợp lệ" });
+        return res.status(404).json({ success: false, message: 'RefreshToken không hợp lệ' })
       }
 
       jwt.verify(refreshToken, process.env.REFRESH_TOKEN, async (err, data) => {
         if (err) {
-          return res
-            .status(401)
-            .json({ success: false, message: "Không được phép" });
+          return res.status(401).json({ success: false, message: 'Không được phép' })
         }
 
         const userData = {
           _id: user._id,
           userName: user.userName,
           email: user.email,
-          role: user.role,
-        };
-        const newAccessToken = generateAccessToken(userData);
-        const newRefreshToken = generateRefreshToken(userData);
+          role: user.role
+        }
+        const newAccessToken = generateAccessToken(userData)
+        const newRefreshToken = generateRefreshToken(userData)
 
         await customerModel.findByIdAndUpdate(user._id, {
-          refreshToken: newRefreshToken,
-        });
+          refreshToken: newRefreshToken
+        })
 
         res.status(200).json({
           accessToken: newAccessToken,
-          refreshToken: newRefreshToken,
-        });
-      });
+          refreshToken: newRefreshToken
+        })
+      })
     } catch (error) {
-      console.error(error);
-      res
-        .status(500)
-        .json({ success: false, message: "Internal server error" });
+      console.error(error)
+      res.status(500).json({ success: false, message: 'Internal server error' })
     }
   },
 
   logOut: async (req, res, next) => {
     try {
-      const { refreshToken } = req.body;
-      await customerModel.findOneAndUpdate(refreshToken, { refreshToken: "" });
-      res.status(200).json({ success: true });
+      const { refreshToken } = req.body
+      await customerModel.findOneAndUpdate(refreshToken, { refreshToken: '' })
+      res.status(200).json({ success: true })
     } catch (err) {
-      next(err);
+      next(err)
     }
   },
   getInfo: async (req, res, next) => {
     try {
-      const { id: userId } = req.params;
-      const userInfo = await customerModel
-        .findById(userId)
-        .select("-password -refreshToken -listOrder -reviewCustomer");
+      const { id: userId } = req.params
+      const userInfo = await customerModel.findById(userId).select('-password -refreshToken -listOrder -reviewCustomer')
       res.status(200).json({
-        userInfo,
-      });
+        userInfo
+      })
     } catch (error) {
-      console.error(error);
-      res
-        .status(500)
-        .json({ success: false, message: "Internal server error" });
+      console.error(error)
+      res.status(500).json({ success: false, message: 'Internal server error' })
     }
   },
   changePassword: async (req, res, next) => {
     try {
-      const id = req.params.id;
-      const { oldPassword, newPassword } = req.body;
-      const user = await customerModel.findById(id);
-      const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+      const id = req.params.id
+      const { oldPassword, newPassword } = req.body
+      const user = await customerModel.findById(id)
+      const isPasswordValid = await bcrypt.compare(oldPassword, user.password)
       if (isPasswordValid) {
-        const hashPassword = await bcrypt.hash(newPassword, 10);
-        await customerModel.findByIdAndUpdate(id, { password: hashPassword });
+        const hashPassword = await bcrypt.hash(newPassword, 10)
+        await customerModel.findByIdAndUpdate(id, { password: hashPassword })
         res.status(200).json({
-          message: "Change passsword success",
-        });
+          message: 'Change passsword success'
+        })
       } else {
         res.status(400).json({
-          message: "Old password is not correct",
-        });
+          message: 'Old password is not correct'
+        })
       }
     } catch (error) {
-      res.status(500);
+      res.status(500)
     }
-  },
-};
+  }
+}
 
-module.exports = customerController;
+module.exports = customerController

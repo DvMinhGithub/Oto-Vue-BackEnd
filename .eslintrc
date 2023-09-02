@@ -1,0 +1,36 @@
+{
+  "root": true,
+  "plugins": ["prettier", "promise", "node"],
+  "extends": ["eslint:recommended", "plugin:node/recommended", "eslint-config-prettier", "prettier"],
+  "parserOptions": {
+    "ecmaVersion": 9,
+    "sourceType": "module",
+    "impliedStrict": false
+  },
+  "rules": {
+    "prettier/prettier": [
+      "warn",
+      {
+        "arrowParens": "always",
+        "semi": false,
+        "trailingComma": "none",
+        "tabWidth": 2,
+        "endOfLine": "auto",
+        "useTabs": false,
+        "singleQuote": true,
+        "printWidth": 120,
+        "jsxSingleQuote": true
+      }
+    ],
+    "no-console": 0,
+    "no-unused-vars": ["error", { "vars": "all", "args": "none", "ignoreRestSiblings": false }],
+    "node/no-unpublished-require": [
+      "error",
+      {
+        "allowModules": [],
+        "convertPath": null,
+        "tryExtensions": [".js", ".json", ".node"]
+      }
+    ]
+  }
+}
